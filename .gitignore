@@ -1,0 +1,8 @@
+uploads
+chroma_langchain_db/
+.venv/
+__pycache__/
+.pytest_cache/
+*.pdf
+.env
+

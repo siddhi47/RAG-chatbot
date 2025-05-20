@@ -1,0 +1,87 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chatbot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</head>
+<body>
+    <h2>Chatbot Interface</h2>
+
+    <!-- File or URL input section -->
+    <div id="upload-section" style="margin-bottom: 20px;">
+        <form id="data-input-form">
+            <label for="file-input">Upload a file:</label>
+            <input type="file" id="file-input" name="file"><br><br>
+
+            <label for="url-input">Or enter a URL:</label>
+            <input type="url" id="url-input" name="url" placeholder="https://example.com"><br><br>
+
+            <button type="submit">Submit</button>
+        </form>
+        <form id="data-delete-form">
+          <button type="submit" id="delete-data-button">Delete Data</button>
+        </form>
+      
+
+    </div>
+
+    <!-- Chat area -->
+    <div id="chat-box"></div>
+    <input type="text" id="message-input" placeholder="Type something...">
+    <button onclick="sendMessage()">Send</button>
+
+
+</body>
+  <script>
+    document.getElementById("data-input-form").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const fileInput = document.getElementById("file-input").files[0];
+    const urlInput = document.getElementById("url-input").value;
+
+    const formData = new FormData();
+    if (fileInput) {
+        formData.append("file", fileInput);
+    }
+    if (urlInput) {
+        formData.append("url", urlInput);
+    }
+
+    fetch("/upload", {
+        method: "POST",
+        body: formData,
+    })
+        .then((res) => res.json())
+        .then((data) => {
+            alert("Upload successful: " + JSON.stringify(data));
+        })
+        .catch((err) => {
+            alert("Upload failed.");
+            console.error(err);
+        });
+});
+
+    document.getElementById("data-delete-form").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const deleteDataButton = document.getElementById("delete-data-button");
+      const formData = new FormData();
+      fetch("/delete", {
+          method: "POST",
+          body: formData,
+          })
+          .then((res) => res.json())
+          .then((data) => {
+              alert("Data deletion successful: " + JSON.stringify(data));
+          })
+          .catch((err) => {
+              alert("Data deletion failed.");
+              console.error(err);
+          });
+          })
+    </script>
+
+</html>
+
