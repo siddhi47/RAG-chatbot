@@ -21,7 +21,9 @@ dependencies = [
     "unstructured (>=0.17.2,<0.18.0)",
     "flask (>=3.1.1,<4.0.0)",
     "flask-socketio (>=5.5.1,<6.0.0)",
-    "eventlet (>=0.40.0,<0.41.0)"
+    "eventlet (>=0.40.0,<0.41.0)",
+    "langchain-cli (>=0.0.36,<0.0.37)",
+    "gritql (>=0.2.0,<0.3.0)"
 ]
 
 [tool.poetry]

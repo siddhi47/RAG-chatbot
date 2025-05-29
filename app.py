@@ -17,7 +17,7 @@ import loguru
 
 warnings.filterwarnings("ignore", category=UserWarning, module="langchain")
 
-llm = init_chat_model("gpt-3.5-turbo", model_provider="openai")
+llm = init_chat_model("gpt-4-turbo", model_provider="openai")
 chroma = Chroma(
     collection_name="PDFRAG",
     persist_directory="./chroma_langchain_db",
