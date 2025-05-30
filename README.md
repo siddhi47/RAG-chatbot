@@ -25,7 +25,7 @@ Optionally, you can set up LangSmith API key to log the interactions with the ch
 You can set up a virtual environment to run the project. You can use `venv` or `virtualenv` to create a virtual environment. Here is an example using `venv`:
 
 ```bash
-venv venv
+virtualenv venv
 source venv/bin/activate
 pip install -e .
 ```
