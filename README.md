@@ -1,6 +1,7 @@
 # RAG Chatbot
 
 This repository contains a simple RAG (Retrieval-Augmented Generation) chatbot built using LangChain, LangGraph, ChromaDB, LangSmith, OPenAI, and Flask.
+This is a basic RAG application where you can add data from various files (pdf, json, csv, txt, etc) and through web links.
 
 Make sure you have python 3.12 or higher installed on your system.
 
