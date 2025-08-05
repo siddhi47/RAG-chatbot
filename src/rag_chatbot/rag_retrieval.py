@@ -1,47 +1,72 @@
 from langgraph.graph import START, StateGraph
-from typing_extensions import List, TypedDict
+from typing_extensions import List, TypedDict, Optional
 from langchain_core.documents import Document
 from langchain import hub
 
 
-PROMPT = hub.pull("rlm/rag-prompt")
+
+
+
+from langchain_community.tools import DuckDuckGoSearchRun
+from langchain.agents import initialize_agent, Tool
+from langchain.agents import AgentType
 
 
 class State(TypedDict):
     question: str
-    context: List[Document]
-    answer: str
+    local_context: List[Document]       # Retrieved from vector store
+    web_context: Optional[List[Document]]  # Retrieved via web search
+    merged_context: List[Document]      # Final set of docs passed to LLM
+    answer: Optional[str]   
 
-
+PROMPT = hub.pull("rlm/rag-prompt")
 class RAGRetrieverGeneration:
     def __init__(self, vector_store, llm):
         self.vector_store = vector_store
         self.llm = llm
 
-    def retrieve(self, state):
-        # Retrieve documents from the vector store
-        retrieved_docs = self.vector_store.similarity_search(state["question"])
-        return {
-            "context": retrieved_docs,
-        }
-
-    def generate(self, state):
-        docs_content = "\n\n".join([doc.page_content for doc in state["context"]])
-        message = PROMPT.invoke(
-            {
-                "question": state["question"],
-                "context": docs_content,
-            }
+        # Web search tool
+        search_tool = Tool(
+            name="web_search",
+            func=DuckDuckGoSearchRun().run,
+            description="Search the web for current or missing information."
         )
 
-        response = self.llm.invoke(message)
+        # Agent that can decide to search
+        self.web_agent = initialize_agent(
+            [search_tool],
+            llm,
+            agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
+            verbose=True
+        )
 
-        return {
-            "answer": response,
-        }
+    def retrieve(self, state):
+        retrieved_docs = self.vector_store.similarity_search(state["question"])
+        return {"local_context": retrieved_docs}
+
+    def search_web(self, state):
+        # Let the agent decide how to search
+        search_result = self.web_agent.run(f"Search for: {state['question']}")
+        doc = Document(page_content=search_result)
+        return {"web_context": [doc]}
+
+    def generate(self, state):
+        docs_content = "\n\n".join([doc.page_content for doc in state["merged_context"]])
+        message = PROMPT.invoke({
+            "question": state["question"],
+            "context": docs_content,
+        })
+        response = self.llm.invoke(message)
+        return {"answer": response}
+
+    def merge_contexts(self, state):
+        merged_docs = state["local_context"] + (state.get("web_context") or [])
+        return {"merged_context": merged_docs}
 
     def graph_builder(self):
-        graph_builder = StateGraph(State).add_sequence([self.retrieve, self.generate])
+        graph_builder = StateGraph(State)
+        graph_builder.add_sequence([self.retrieve, self.search_web,self.merge_contexts, self.generate])
         graph_builder.add_edge(START, "retrieve")
         graph = graph_builder.compile()
         return graph
+

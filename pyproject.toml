@@ -25,7 +25,8 @@ dependencies = [
     "langchain-cli (>=0.0.36,<0.0.37)",
     "gritql (>=0.2.0,<0.3.0)",
     "jq (>=1.8.0,<2.0.0)",
-    "gunicorn (>=23.0.0,<24.0.0)"
+    "gunicorn (>=23.0.0,<24.0.0)",
+    "duckduckgo-search (>=8.1.1,<9.0.0)"
 ]
 
 [tool.poetry]
