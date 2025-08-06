@@ -51,7 +51,10 @@ class RAGRetrieverGeneration:
         return {"web_context": [doc]}
 
     def generate(self, state):
-        docs_content = "\n\n".join([doc.page_content for doc in state["merged_context"]])
+        summaries = [self.llm.invoke(f"Summarize:\n\n{doc.page_content}") 
+             for doc in state.get("merged_context", [])]
+        
+        docs_content = "\n\n".join(summaries)
         message = PROMPT.invoke({
             "question": state["question"],
             "context": docs_content,
