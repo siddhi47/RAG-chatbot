@@ -15,16 +15,28 @@ import loguru
 
 
 class PDFLoader:
-    def __init__(self, file_path):
+    """
+        Loader for PDF files using PyMuPDFLoader.
+    """"
+    def __init__(self, file_path:str):
         self.file_path = file_path
         self.loader = PyMuPDFLoader(file_path)
 
-    def load(self):
+    def load(self)-> list[Document]:
         return self.loader.load()
 
 
 class RAGIndexing:
+    """
+        Indexing class for creating a vector store from PDF documents.
+    """"
     def __init__(self, *args, **kwargs):
+        """
+            param args: Additional arguments for customization
+            param kwargs: Keyword arguments for customization
+
+        """
+            
         self.args = args
         self.kwargs = kwargs
         self.dataloader = DataLoader()
@@ -32,7 +44,10 @@ class RAGIndexing:
         self.__create_embeddings()
         self.__init_vector_store()
 
-    def __create_embeddings(self):
+    def __create_embeddings(self)-> None:
+        """
+            Create embeddings using OpenAI's text-embedding-ada-002 model.
+        """
         model = self.kwargs.get("model", "text-embedding-ada-002")
         try:
             self.embeddings = OpenAIEmbeddings(
@@ -41,7 +56,11 @@ class RAGIndexing:
         except Exception as e:
             raise Exception(f"Error creating embeddings using model : {model}: {e}")
 
-    def __init_vector_store(self):
+    def __init_vector_store(self)-> None:
+        """
+            Initialize the vector store using Chroma.
+
+        """
         persist_directory = self.kwargs.get(
             "persist_directory", "./chroma_langchain_db"
         )
@@ -57,14 +76,22 @@ class RAGIndexing:
                 f"Error initializing vector store at {persist_directory}: {e}"
             )
 
-    def load_documents(self, file_path):
+    def load_documents(self, file_path:str)-> list[Document]:
+
+        """
+            Load documents from a file or URL.
+        """
         try:
             self.loader = self.dataloader.load(file_path)
             return self.loader
         except Exception as e:
             raise Exception(f"Error loading PDF (at {file_path}) document: {e}")
 
-    def split_documents(self, documents):
+    def split_documents(self, documents:List[Document])-> list[Document]:
+        """
+            Split documents into smaller chunks for better indexing.
+            param documents: List of Document objects to split.
+        """
         try:
             text_splitter = RecursiveCharacterTextSplitter(
                 chunk_size=1000,
@@ -76,7 +103,12 @@ class RAGIndexing:
         except Exception as e:
             raise Exception(f"Error splitting documents: {e}")
 
-    def create_index(self, file_path):
+    def create_index(self, file_path:str)-> None:
+        """
+            Create an index for the given file path.
+
+            param file_path: Path to the file or URL to index.
+        """
         try:
             # Create hash for uniqueness
             doc_hash = sha256(file_path.encode()).hexdigest()
