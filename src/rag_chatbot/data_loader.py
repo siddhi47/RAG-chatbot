@@ -21,7 +21,7 @@ class DataLoader:
         """
         self.encoding = encoding
 
-    def load(self, path_or_url: str):
+    def load(self, path_or_url: str)-> list:
         """
         load from url or file
         Supported file types: PDF, markdown, html, json, docx
@@ -37,17 +37,17 @@ class DataLoader:
         else:
             raise ValueError(f"Invalid path or URL: {path_or_url}")
 
-    def _is_url(self, string):
+    def _is_url(self, string:str) -> bool:
         parsed = urlparse(string)
         return parsed.scheme in ["http", "https"]
 
-    def _load_url(self, url):
+    def _load_url(self, url:str) -> list:
         try:
             return UnstructuredURLLoader(urls=[url]).load()
         except Exception as e:
             raise RuntimeError(f"Failed to load URL: {e}")
 
-    def _load_file(self, file_path):
+    def _load_file(self, file_path:str) -> list:
         ext = os.path.splitext(file_path)[-1].lower()
         mime, _ = mimetypes.guess_type(file_path)
 
