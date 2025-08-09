@@ -65,7 +65,7 @@ class RAGRetrieverGeneration:
         """
             Generates an answer using the retrieved documents.
         """
-        summaries = [self.llm.invoke(f"Summarize:\n\n{doc.page_content}") 
+        summaries = [self.llm.invoke(f"Summarize:\n\n{doc.page_content}").content 
              for doc in state.get("merged_context", [])]
         
         docs_content = "\n\n".join(summaries)
