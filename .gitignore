@@ -7,3 +7,5 @@ __pycache__/
 .env
 .grit/
 .DS_Store
+.env.secrets
+

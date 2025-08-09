@@ -1,35 +1,43 @@
-# Use a Python base image
 FROM python:3.12-slim
 
-# Set environment variables to prevent Python from writing pyc files to disc
-ENV PYTHONDONTWRITEBYTECODE 1
-# Set environment variables to ensure that the output is displayed immediately in the console
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
 
-# Create and set the working directory inside the container
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update \
-  && apt-get install -y \
-  build-essential \
-  libpq-dev \
-  && rm -rf /var/lib/apt/lists/*
+# ---- system dependencies for your libs ----
+# - libgl1, libglib2.0-0: pymupdf (fitz)
+# - libmagic1: unstructured filetype detection
+# - poppler-utils: PDF text extraction (optional but common)
+# - curl/ca-certificates: general networking sanity
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    libpq-dev \
+    libgl1 \
+    libglib2.0-0 \
+    libmagic1 \
+    poppler-utils \
+    curl ca-certificates \
+ && rm -rf /var/lib/apt/lists/*
 
-# Copy the requirements.txt file and install dependencies
+# Copy and install python package (uses poetry-core backend)
+COPY pyproject.toml README.md /app/
+# if you have a src layout (you do), copy src/ and app.py
+COPY src/ /app/src/
+COPY static/ /app/static/
+COPY templates/ /app/templates/
+COPY app.py /app/
+# (if you have other runtime files, copy them too)
+# COPY templates/ static/ ...
 
-COPY . /app/
-RUN pip install .
+# Install your project (builds wheel via poetry-core and installs)
+RUN pip install --no-cache-dir .
 
-# Copy the entire project to the container
-
-# Expose the Flask port (5000 by default)
+# Expose Flask/Gunicorn port
 EXPOSE 5050
 
-# Set the environment variable for Flask
-ENV FLASK_APP=app.py
-ENV FLASK_RUN_HOST=0.0.0.0
+ENV FLASK_APP=app.py \
+    FLASK_RUN_HOST=0.0.0.0
 
-# Start the Flask app
 
-CMD ["gunicorn","-b", "0.0.0.0:5050" , "app:app"]
+CMD ["gunicorn", "-k", "eventlet", "-w", "1", "--timeout", "0", "-b", "0.0.0.0:5050", "app:app"]

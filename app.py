@@ -35,7 +35,7 @@ rag_retrieval = RAGRetrieverGeneration(chroma, llm)
 retriever = rag_retrieval.graph_builder()
 
 app = Flask(__name__)
-socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app, async_mode="eventlet", cors_allowed_origins="*", ping_interval=25, ping_timeout=60)
 
 
 @app.route("/upload", methods=["POST"])

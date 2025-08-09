@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv()
-
+from typing import List
 from langchain.schema import Document
 from langchain_community.document_loaders import PyMuPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -17,7 +17,7 @@ import loguru
 class PDFLoader:
     """
         Loader for PDF files using PyMuPDFLoader.
-    """"
+    """
     def __init__(self, file_path:str):
         self.file_path = file_path
         self.loader = PyMuPDFLoader(file_path)
@@ -29,7 +29,7 @@ class PDFLoader:
 class RAGIndexing:
     """
         Indexing class for creating a vector store from PDF documents.
-    """"
+    """
     def __init__(self, *args, **kwargs):
         """
             param args: Additional arguments for customization
@@ -87,7 +87,7 @@ class RAGIndexing:
         except Exception as e:
             raise Exception(f"Error loading PDF (at {file_path}) document: {e}")
 
-    def split_documents(self, documents:List[Document])-> list[Document]:
+    def split_documents(self, documents):
         """
             Split documents into smaller chunks for better indexing.
             param documents: List of Document objects to split.

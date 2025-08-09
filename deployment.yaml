@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-infer
+  labels:
+    app: my-infer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: my-infer
+  template:
+    metadata:
+      labels:
+        app: my-infer
+    spec:
+      containers:
+        - name: my-infer
+          image: my-infer:local
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5050
+          resources:
+            requests:
+              cpu: "1"      # guaranteed baseline (0.25 CPU core)
+              memory: 1Gi  # baseline memory
+            limits:
+              cpu: "2"       # max CPU this container can use (1 full core)
+              memory: "4Gi"
+          envFrom:
+            - configMapRef:
+                name: my-config
+            - secretRef:
+                name: my-secrets
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-infer
+  labels:
+    app: my-infer
+spec:
+  type: NodePort
+  selector:
+    app: my-infer
+  ports:
+    - protocol: TCP
+      port: 5050         # Service port
+      targetPort: 5050   # Container port
+      nodePort: 32050    # Optional: set static NodePort (between 30000–32767)
+

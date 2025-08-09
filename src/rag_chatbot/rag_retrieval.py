@@ -44,14 +44,14 @@ class RAGRetrieverGeneration:
             verbose=True
         )
 
-    def retrieve(self, state:TypedDict) -> dict:
+    def retrieve(self, state) -> dict:
         """
             Retrieves relevant documents from the vector store based on the question.
         """
         retrieved_docs = self.vector_store.similarity_search(state["question"])
         return {"local_context": retrieved_docs}
 
-    def search_web(self, state:TypedDict) -> dict:
+    def search_web(self, state) -> dict:
         """
             Searches the web for additional information if local context is insufficient.
         """
@@ -60,7 +60,8 @@ class RAGRetrieverGeneration:
         doc = Document(page_content=search_result)
         return {"web_context": [doc]}
 
-    def generate(self, state:TypedDict) -> dict:
+    
+    def generate(self, state) -> dict:
         """
             Generates an answer using the retrieved documents.
         """
@@ -75,7 +76,7 @@ class RAGRetrieverGeneration:
         response = self.llm.invoke(message)
         return {"answer": response}
 
-    def merge_contexts(self, state:TypedDict) -> dict:
+    def merge_contexts(self, state) -> dict:
         """
             Merges local and web contexts into a single list of documents.
         """
